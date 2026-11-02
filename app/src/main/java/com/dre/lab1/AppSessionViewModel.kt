@@ -18,7 +18,7 @@ class AppSessionViewModel : ViewModel() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val model = when (modelClass) {
                     BleViewModel::class.java -> BleViewModel(connector = connector)
-                    MonitorViewModel::class.java -> MonitorViewModel(phone, connector)
+                    MonitorViewModel::class.java -> MonitorViewModel(phone, connector, (context.applicationContext as SensorApplication).sensorRepository)
                     else -> error("Unknown ViewModel: $modelClass")
                 }
                 return modelClass.cast(model)!!

@@ -14,6 +14,10 @@ lifecycle = "2.9.4"
 coroutines = "1.10.2"
 
 [libraries]
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.7.0" }
+firebase-database = { module = "com.google.firebase:firebase-database" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -29,7 +33,9 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
+google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
 

@@ -140,7 +140,7 @@ class BleTest {
                 try { emitAll(phoneValues) } finally { subscriptions-- }
             }
         }
-        val vm = MonitorViewModel(phone, connector)
+        val vm = MonitorViewModel(phone, connector, testRepository)
         val store = ViewModelStore().apply { put("monitor", vm) }
         val phoneReading = Acceleration(1f, 2f, 3f)
         try {
@@ -190,7 +190,7 @@ class BleTest {
     @Test
     fun sensorFailureIsDurableStateAndTransientEvent() = runTest(dispatcher) {
         val connector = MockBleConnector()
-        val vm = MonitorViewModel(SensorReader { flow { error("Sensor unavailable") } }, connector)
+        val vm = MonitorViewModel(SensorReader { flow { error("Sensor unavailable") } }, connector, testRepository)
         val store = ViewModelStore().apply { put("monitor", vm) }
         val events = mutableListOf<MonitorEvent>()
         backgroundScope.launch { vm.events.collect { events += it } }
@@ -203,4 +203,10 @@ class BleTest {
             assertEquals(listOf(MonitorEvent.ShowMessage("Sensor unavailable")), events)
         } finally { store.clear(); connector.close() }
     }
+}
+
+private val testRepository = object : com.dre.lab1.repository.SensorRepository {
+    override val deviceId = "test"
+    override val status = kotlinx.coroutines.flow.MutableStateFlow(com.dre.lab1.repository.UploadStatus())
+    override fun submit(data: com.dre.lab1.repository.SensorData) = Unit
 }

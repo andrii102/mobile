@@ -6,13 +6,17 @@ import com.dre.lab1.helpers.IBleConnector
 import com.dre.lab1.helpers.SensorReader
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import com.dre.lab1.repository.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MonitorViewModel(
     private val phone: SensorReader,
-    private val ble: IBleConnector
+    private val ble: IBleConnector,
+    private val repository: SensorRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(MonitorState())
     val state = _state.asStateFlow()
@@ -20,6 +24,21 @@ class MonitorViewModel(
     val events = _events.receiveAsFlow()
     private var collectionJob: Job? = null
     private var active = false
+    private var samplingJob: Job? = null
+    private var latest: SensorData? = null
+
+    init {
+        viewModelScope.launch {
+            var previousMessage: String? = null
+            repository.status.collect { status ->
+                _state.update { it.copy(uploadStatus = status) }
+                if (status.message != null && status.message != previousMessage) {
+                    _events.send(MonitorEvent.ShowMessage(status.message))
+                }
+                previousMessage = status.message
+            }
+        }
+    }
 
     fun onAction(action: MonitorAction) {
         when (action) {
@@ -47,11 +66,21 @@ class MonitorViewModel(
             it.copy(status = if (it.source == SensorSource.PHONE) "Очікування даних телефону"
                 else "Підключіть BLE-акселерометр")
         }
+        samplingJob = viewModelScope.launch {
+            while (isActive) {
+                delay(1_000)
+                latest?.let(repository::submit)
+                latest = null
+            }
+        }
         collectionJob = viewModelScope.launch {
             try {
                 val source = _state.value.source
                 val readings = if (source == SensorSource.PHONE) phone.readings() else ble.readings
                 readings.collect { reading ->
+                    latest = reading?.let {
+                        SensorData(repository.deviceId, System.currentTimeMillis(), source.name, it.x, it.y, it.z)
+                    }
                     _state.update {
                         it.copy(
                             reading = reading,
@@ -64,6 +93,8 @@ class MonitorViewModel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
+                samplingJob?.cancel()
+                latest = null
                 val message = error.message ?: "Помилка акселерометра"
                 _state.update { it.copy(reading = null, isRunning = false, status = message) }
                 _events.send(MonitorEvent.ShowMessage(message))
@@ -72,6 +103,9 @@ class MonitorViewModel(
     }
 
     private fun stop() {
+        samplingJob?.cancel()
+        samplingJob = null
+        latest = null
         collectionJob?.cancel()
         collectionJob = null
         _state.update { it.copy(reading = null, isRunning = false) }

@@ -64,6 +64,8 @@ fun MonitorContent(state: MonitorState, onAction: (MonitorAction) -> Unit) {
             }
         }
         Text(state.status)
+        Text("Firebase: ${state.uploadStatus.phase}")
+        state.uploadStatus.message?.let { Text(it) }
 
         // Блок числових значень
         Card(

@@ -5,6 +5,7 @@ import com.dre.lab1.helpers.Acceleration
 enum class SensorSource { PHONE, BLE }
 
 data class MonitorState(
+    val uploadStatus: com.dre.lab1.repository.UploadStatus = com.dre.lab1.repository.UploadStatus(),
     val source: SensorSource = SensorSource.PHONE,
     val reading: Acceleration? = null,
     val isRunning: Boolean = false,
