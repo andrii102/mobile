@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.dre.lab1.ble.BleViewModel
 import com.dre.lab1.helpers.MockBleConnector
 import com.dre.lab1.helpers.PhoneSensorReader
+import com.dre.lab1.helpers.SmartActuator
 import com.dre.lab1.monitor.MonitorViewModel
 
 /** Activity-retained dependency owner; screen ViewModels never reference each other. */
@@ -18,7 +19,11 @@ class AppSessionViewModel : ViewModel() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val model = when (modelClass) {
                     BleViewModel::class.java -> BleViewModel(connector = connector)
-                    MonitorViewModel::class.java -> MonitorViewModel(phone, connector, (context.applicationContext as SensorApplication).sensorRepository)
+                    MonitorViewModel::class.java -> {
+                        val app = context.applicationContext as SensorApplication
+                        MonitorViewModel(phone, connector, app.sensorRepository,
+                            SmartActuator(app), app.remoteCommandRepository)
+                    }
                     else -> error("Unknown ViewModel: $modelClass")
                 }
                 return modelClass.cast(model)!!

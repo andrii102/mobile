@@ -1,0 +1,21 @@
+<resources>
+    <string name="actuator_title">Виконавчі пристрої</string>
+    <string name="mode_auto">Auto</string>
+    <string name="mode_remote">Remote</string>
+    <string name="siren">Сирена</string>
+    <string name="vibration">Вібрація</string>
+    <string name="flashlight">Ліхтарик</string>
+    <string name="stop_alarm">Stop — вимкнути все</string>
+    <string name="allow_camera">Надати дозвіл на камеру</string>
+    <string name="flash_unavailable">Спалах відсутній</string>
+    <string name="vibrator_unavailable">Вібромотор відсутній</string>
+    <string name="auto_thresholds">Запуск: ≥ %1$.0f м/с²; готовність після руху: &lt; %2$.1f м/с²</string>
+    <string name="acceleration_magnitude">Модуль прискорення: %1$.2f м/с²</string>
+    <string name="auto_alarm_active">Тривога активна до натискання Stop</string>
+    <string name="auto_armed">Готовий до виявлення руху</string>
+    <string name="auto_waiting">Очікування завершення руху</string>
+    <string name="remote_connected">Firebase: команди підключено</string>
+    <string name="remote_waiting">Firebase: очікування з’єднання та команд</string>
+    <string name="actuator_on">Увімкнено</string>
+    <string name="actuator_off">Вимкнено</string>
+</resources>

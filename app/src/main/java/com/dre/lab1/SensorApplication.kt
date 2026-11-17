@@ -12,6 +12,18 @@ import java.util.UUID
 
 class SensorApplication : Application() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    val remoteCommandRepository: RemoteCommandRepository by lazy {
+        FirebaseRemoteCommandRepository {
+            check(FirebaseApp.initializeApp(this) != null) {
+                "Firebase is not configured. Add app/google-services.json."
+            }
+            val auth = FirebaseAuth.getInstance()
+            val user = auth.currentUser ?: auth.signInAnonymously().await().user
+                ?: error("Anonymous authentication failed")
+            FirebaseDatabase.getInstance().getReference("users").child(user.uid)
+                .child("commands").child(sensorRepository.deviceId)
+        }
+    }
     val sensorRepository: SensorRepository by lazy {
         val prefs = getSharedPreferences("sensor_installation", MODE_PRIVATE)
         val id = prefs.getString("id", null) ?: UUID.randomUUID().toString().also {

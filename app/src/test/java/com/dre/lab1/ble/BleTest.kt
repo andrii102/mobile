@@ -1,6 +1,8 @@
 package com.dre.lab1.ble
 
 import androidx.lifecycle.ViewModelStore
+import com.dre.lab1.FakeActuator
+import com.dre.lab1.repository.RemoteCommandRepository
 import com.dre.lab1.helpers.*
 import com.dre.lab1.monitor.*
 import kotlinx.coroutines.*
@@ -140,7 +142,8 @@ class BleTest {
                 try { emitAll(phoneValues) } finally { subscriptions-- }
             }
         }
-        val vm = MonitorViewModel(phone, connector, testRepository)
+        val vm = MonitorViewModel(phone, connector, testRepository, FakeActuator(),
+            RemoteCommandRepository { emptyFlow() })
         val store = ViewModelStore().apply { put("monitor", vm) }
         val phoneReading = Acceleration(1f, 2f, 3f)
         try {
@@ -190,7 +193,8 @@ class BleTest {
     @Test
     fun sensorFailureIsDurableStateAndTransientEvent() = runTest(dispatcher) {
         val connector = MockBleConnector()
-        val vm = MonitorViewModel(SensorReader { flow { error("Sensor unavailable") } }, connector, testRepository)
+        val vm = MonitorViewModel(SensorReader { flow { error("Sensor unavailable") } }, connector,
+            testRepository, FakeActuator(), RemoteCommandRepository { emptyFlow() })
         val store = ViewModelStore().apply { put("monitor", vm) }
         val events = mutableListOf<MonitorEvent>()
         backgroundScope.launch { vm.events.collect { events += it } }

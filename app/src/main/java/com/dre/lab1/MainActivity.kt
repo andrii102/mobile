@@ -1,6 +1,10 @@
 package com.dre.lab1
 
 import android.os.Bundle
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -23,6 +27,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val monitorState by viewModel.state.collectAsStateWithLifecycle()
+            val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+                viewModel.onAction(MonitorAction.CameraPermissionResult(it))
+            }
+            LaunchedEffect(monitorState.permissionRequestPending) {
+                if (monitorState.permissionRequestPending) cameraPermission.launch(Manifest.permission.CAMERA)
+            }
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
